@@ -74,11 +74,11 @@ Seeded credentials for different organizational roles:
 
 | Role | Username / Email | Password |
 | :--- | :--- | :--- |
-| **Admin** | `admin@transitops.com` | `sexyladyonthefloor123` |
-| **Fleet Manager** | `fleet@transitops.com` | `sexyladyonthefloor123` |
-| **Dispatcher** | `dispatcher@transitops.com` | `sexyladyonthefloor123` |
-| **Safety Officer** | `safety@transitops.com` | `sexyladyonthefloor123` |
-| **Financial Analyst** | `finance@transitops.com` | `sexyladyonthefloor123` |
+| **Admin** | `admin@transitops.com` | `test123` |
+| **Fleet Manager** | `fleet@transitops.com` | `test123` |
+| **Dispatcher** | `dispatcher@transitops.com` | `test123` |
+| **Safety Officer** | `safety@transitops.com` | `test123` |
+| **Financial Analyst** | `finance@transitops.com` | `test123` |
 
 ---
 

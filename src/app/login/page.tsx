@@ -52,7 +52,7 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
-                defaultValue="sexyladyonthefloor123"
+                defaultValue="test123"
                 className="h-12 border-zinc-800 bg-zinc-900 focus-visible:ring-zinc-700"
               />
             </div>
