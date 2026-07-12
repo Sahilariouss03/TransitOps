@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma"
 import { columns } from "./columns"
-import { DataTable } from "./data-table"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { Plus } from "lucide-react"
