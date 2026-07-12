@@ -13,10 +13,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { signOut } from "next-auth/react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { signOut, useSession } from "next-auth/react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export function TopNav() {
+  const { data: session } = useSession()
+  const router = useRouter()
+  
+  // Safe defaults if session is loading or missing
+  const userName = session?.user?.name || "User"
+  const userEmail = session?.user?.email || ""
+  const userInitials = userName.substring(0, 2).toUpperCase()
+  
   return (
     <div className="flex flex-1 items-center justify-between gap-4 md:justify-end">
       <div className="w-full flex-1 md:w-auto md:flex-none">
@@ -35,17 +45,33 @@ export function TopNav() {
         </Button>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-600"></span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5 text-muted-foreground" />
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-600"></span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64" align="end">
+            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
+              <span className="text-sm font-medium">New Trip Assigned</span>
+              <span className="text-xs text-muted-foreground">You have been assigned to trip TRP-1042</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
+              <span className="text-sm font-medium">Maintenance Alert</span>
+              <span className="text-xs text-muted-foreground">Vehicle TRN-1015 requires oil change</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/avatars/01.png" alt="@admin" />
-                  <AvatarFallback>AD</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary font-medium">{userInitials}</AvatarFallback>
                 </Avatar>
               </Button>
             }
@@ -53,19 +79,26 @@ export function TopNav() {
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Admin</p>
+                <p className="text-sm font-medium leading-none">{userName}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  admin@transitops.com
+                  {userEmail}
                 </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings" className="w-full cursor-pointer">Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings" className="w-full cursor-pointer">Settings</Link>
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut()}>
+            <DropdownMenuItem 
+              className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50" 
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

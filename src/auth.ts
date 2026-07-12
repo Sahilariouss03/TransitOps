@@ -14,7 +14,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
+        role: { label: "Role", type: "text" }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
@@ -24,6 +25,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
         
         if (!user || !user.passwordHash) return null;
+        
+        // Verify role selection matches database role (or if they are an admin, they are an admin)
+        if (credentials.role && user.role !== credentials.role) {
+          return null; // Invalid role for this user
+        }
         
         const isValid = await bcrypt.compare(credentials.password as string, user.passwordHash);
         

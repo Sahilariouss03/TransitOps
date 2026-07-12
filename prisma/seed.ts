@@ -16,12 +16,56 @@ async function main() {
   const passwordHash = await bcrypt.hash('sexyladyonthefloor123', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@transitops.com' },
-    update: {},
+    update: { role: Role.ADMIN },
     create: {
       email: 'admin@transitops.com',
       name: 'Admin Manager',
       passwordHash,
+      role: Role.ADMIN,
+    },
+  });
+
+  const fleetManager = await prisma.user.upsert({
+    where: { email: 'fleet@transitops.com' },
+    update: { role: Role.FLEET_MANAGER },
+    create: {
+      email: 'fleet@transitops.com',
+      name: 'Fleet Manager',
+      passwordHash,
       role: Role.FLEET_MANAGER,
+    },
+  });
+
+  const dispatcher = await prisma.user.upsert({
+    where: { email: 'dispatcher@transitops.com' },
+    update: { role: Role.DISPATCHER },
+    create: {
+      email: 'dispatcher@transitops.com',
+      name: 'Route Dispatcher',
+      passwordHash,
+      role: Role.DISPATCHER,
+    },
+  });
+
+  const safety = await prisma.user.upsert({
+    where: { email: 'safety@transitops.com' },
+    update: { role: Role.SAFETY_OFFICER },
+    create: {
+      email: 'safety@transitops.com',
+      name: 'Safety Officer',
+      passwordHash,
+      role: Role.SAFETY_OFFICER,
+    },
+  });
+
+  const finance = await prisma.user.upsert({
+    where: { email: 'finance@transitops.com' },
+    update: { role: Role.FINANCIAL_ANALYST },
+    create: {
+      email: 'finance@transitops.com',
+      name: 'Financial Analyst',
+      passwordHash,
+      role: Role.FINANCIAL_ANALYST,
     },
   });
 
