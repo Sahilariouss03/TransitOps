@@ -38,6 +38,7 @@ export default async function DispatchTripPage() {
           vehicles={vehicles} 
           drivers={drivers} 
           weightUnit={weightUnit} 
+          currencyCode={currencyCode} 
         />
       </div>
     </div>

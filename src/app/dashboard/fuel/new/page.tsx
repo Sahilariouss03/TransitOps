@@ -3,13 +3,21 @@ import { FuelForm } from "@/components/fuel/fuel-form"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
+import prisma from "@/lib/prisma"
 
 export const metadata = {
   title: "Log Fuel",
 }
 
 export default async function NewFuelLogPage() {
-  const vehicles = await getVehiclesForFuel()
+  const [vehicles, settings] = await Promise.all([
+    getVehiclesForFuel(),
+    prisma.appSettings.findUnique({
+      where: { id: "default" }
+    })
+  ])
+
+  const currencyCode = settings?.currency || "INR"
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -26,7 +34,7 @@ export default async function NewFuelLogPage() {
       </div>
       
       <div className="max-w-3xl rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-        <FuelForm vehicles={vehicles} />
+        <FuelForm vehicles={vehicles} currencyCode={currencyCode} />
       </div>
     </div>
   )

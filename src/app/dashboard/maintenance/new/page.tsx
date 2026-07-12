@@ -3,13 +3,21 @@ import { MaintenanceForm } from "@/components/maintenance/maintenance-form"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
+import prisma from "@/lib/prisma"
 
 export const metadata = {
   title: "Log Maintenance",
 }
 
 export default async function NewMaintenanceLogPage() {
-  const vehicles = await getVehiclesForMaintenance()
+  const [vehicles, settings] = await Promise.all([
+    getVehiclesForMaintenance(),
+    prisma.appSettings.findUnique({
+      where: { id: "default" }
+    })
+  ])
+
+  const currencyCode = settings?.currency || "INR"
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -26,7 +34,7 @@ export default async function NewMaintenanceLogPage() {
       </div>
       
       <div className="max-w-4xl rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-        <MaintenanceForm vehicles={vehicles} />
+        <MaintenanceForm vehicles={vehicles} currencyCode={currencyCode} />
       </div>
     </div>
   )

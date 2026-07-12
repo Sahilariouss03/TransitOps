@@ -36,9 +36,10 @@ interface DispatchFormProps {
   vehicles: Vehicle[]
   drivers: Driver[]
   weightUnit: string
+  currencyCode: string
 }
 
-export function DispatchForm({ vehicles, drivers, weightUnit }: DispatchFormProps) {
+export function DispatchForm({ vehicles, drivers, weightUnit, currencyCode }: DispatchFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -253,7 +254,7 @@ export function DispatchForm({ vehicles, drivers, weightUnit }: DispatchFormProp
             name="revenue"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Expected Revenue ($)</FormLabel>
+                <FormLabel>Expected Revenue ({currencyCode === "INR" ? "₹" : "$"})</FormLabel>
                 <FormControl>
                   <Input
                     type="number"

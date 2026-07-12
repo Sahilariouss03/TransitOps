@@ -31,9 +31,10 @@ import {
 
 interface MaintenanceFormProps {
   vehicles: { id: string; registrationNumber: string; manufacturer: string; model: string }[]
+  currencyCode: string
 }
 
-export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
+export function MaintenanceForm({ vehicles, currencyCode }: MaintenanceFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [file, setFile] = useState<File | null>(null)
@@ -257,7 +258,7 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             name="estimatedCost"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estimated Cost ($)</FormLabel>
+                <FormLabel>Estimated Cost ({currencyCode === "INR" ? "₹" : "$"})</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -279,7 +280,7 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             name="actualCost"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Actual Cost ($) - Optional</FormLabel>
+                <FormLabel>Actual Cost ({currencyCode === "INR" ? "₹" : "$"}) - Optional</FormLabel>
                 <FormControl>
                   <Input
                     type="number"

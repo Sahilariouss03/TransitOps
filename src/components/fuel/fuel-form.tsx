@@ -30,9 +30,10 @@ import {
 
 interface FuelFormProps {
   vehicles: { id: string; registrationNumber: string; type: string }[]
+  currencyCode: string
 }
 
-export function FuelForm({ vehicles }: FuelFormProps) {
+export function FuelForm({ vehicles, currencyCode }: FuelFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
@@ -170,7 +171,7 @@ export function FuelForm({ vehicles }: FuelFormProps) {
             name="cost"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Total Cost ($)</FormLabel>
+                <FormLabel>Total Cost ({currencyCode === "INR" ? "₹" : "$"})</FormLabel>
                 <FormControl>
                   <Input
                     type="number"

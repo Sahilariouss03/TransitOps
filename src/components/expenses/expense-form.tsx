@@ -28,7 +28,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export function ExpenseForm() {
+interface ExpenseFormProps {
+  currencyCode: string
+}
+
+export function ExpenseForm({ currencyCode }: ExpenseFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
@@ -96,7 +100,7 @@ export function ExpenseForm() {
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount ($)</FormLabel>
+                <FormLabel>Amount ({currencyCode === "INR" ? "₹" : "$"})</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
