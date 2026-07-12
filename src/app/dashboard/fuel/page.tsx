@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma"
-import { getColumns } from "./columns"
-import { DataTable } from "@/components/ui/data-table"
+import { FuelTableClient } from "@/components/fuel/fuel-table-client"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { Plus } from "lucide-react"
@@ -34,8 +33,6 @@ export default async function FuelPage() {
     date: log.date,
   }))
 
-  const columns = getColumns(currencyCode)
-
   return (
     <div className="flex flex-col gap-6 p-4">
       <div className="flex items-center justify-between">
@@ -50,7 +47,7 @@ export default async function FuelPage() {
         </Link>
       </div>
       <div className="mx-auto w-full max-w-full">
-        <DataTable columns={columns} data={formattedLogs} searchKey="vehicleReg" />
+        <FuelTableClient data={formattedLogs} currencyCode={currencyCode} />
       </div>
     </div>
   )
