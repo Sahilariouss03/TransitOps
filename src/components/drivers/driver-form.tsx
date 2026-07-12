@@ -36,7 +36,8 @@ export function DriverForm({ initialData }: DriverFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   
   const form = useForm<DriverFormValues>({
-    resolver: zodResolver(driverSchema) as any,
+    // @ts-expect-error React Hook Form type mismatch with zod enums
+    resolver: zodResolver(driverSchema),
     defaultValues: initialData || {
       name: "",
       licenseNumber: "",

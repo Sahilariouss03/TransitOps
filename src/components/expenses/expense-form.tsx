@@ -32,7 +32,8 @@ export function ExpenseForm() {
   const [isLoading, setIsLoading] = useState(false)
   
   const form = useForm<ExpenseFormValues>({
-    resolver: zodResolver(expenseSchema) as any,
+    // @ts-expect-error React Hook Form type mismatch with zod coerced numbers
+    resolver: zodResolver(expenseSchema),
     defaultValues: {
       category: "OTHER",
       amount: 0,
