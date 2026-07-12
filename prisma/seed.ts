@@ -16,7 +16,7 @@ async function main() {
   const passwordHash = await bcrypt.hash('test123', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@transitops.com' },
-    update: { role: Role.ADMIN },
+    update: { role: Role.ADMIN, passwordHash },
     create: {
       email: 'admin@transitops.com',
       name: 'Admin Manager',
@@ -27,7 +27,7 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'fleet@transitops.com' },
-    update: { role: Role.FLEET_MANAGER },
+    update: { role: Role.FLEET_MANAGER, passwordHash },
     create: {
       email: 'fleet@transitops.com',
       name: 'Fleet Manager',
@@ -38,7 +38,7 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'dispatcher@transitops.com' },
-    update: { role: Role.DISPATCHER },
+    update: { role: Role.DISPATCHER, passwordHash },
     create: {
       email: 'dispatcher@transitops.com',
       name: 'Route Dispatcher',
@@ -49,7 +49,7 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'safety@transitops.com' },
-    update: { role: Role.SAFETY_OFFICER },
+    update: { role: Role.SAFETY_OFFICER, passwordHash },
     create: {
       email: 'safety@transitops.com',
       name: 'Safety Officer',
@@ -60,7 +60,7 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'finance@transitops.com' },
-    update: { role: Role.FINANCIAL_ANALYST },
+    update: { role: Role.FINANCIAL_ANALYST, passwordHash },
     create: {
       email: 'finance@transitops.com',
       name: 'Financial Analyst',
