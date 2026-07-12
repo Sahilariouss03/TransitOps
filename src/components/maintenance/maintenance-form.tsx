@@ -97,7 +97,14 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             render={({ field }) => (
               <FormItem className="md:col-span-2">
                 <FormLabel>Vehicle</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  items={vehicles.map((v) => ({
+                    value: v.id,
+                    label: `${v.registrationNumber} - ${v.manufacturer} ${v.model}`,
+                  }))}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select vehicle for maintenance" />
@@ -136,7 +143,18 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Maintenance Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  items={[
+                    { value: "SERVICE", label: "Regular Service" },
+                    { value: "OIL_CHANGE", label: "Oil Change" },
+                    { value: "TIRE", label: "Tire Replacement" },
+                    { value: "ENGINE", label: "Engine Repair" },
+                    { value: "ACCIDENT", label: "Accident Repair" },
+                    { value: "OTHER", label: "Other" }
+                  ]}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -162,7 +180,16 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Priority</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  items={[
+                    { value: "LOW", label: "Low" },
+                    { value: "MEDIUM", label: "Medium" },
+                    { value: "HIGH", label: "High" },
+                    { value: "CRITICAL", label: "Critical (AOG)" }
+                  ]}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select priority" />
@@ -200,7 +227,15 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  items={[
+                    { value: "OPEN", label: "Open (Scheduled)" },
+                    { value: "IN_PROGRESS", label: "In Shop (In Progress)" },
+                    { value: "COMPLETED", label: "Completed" }
+                  ]}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
