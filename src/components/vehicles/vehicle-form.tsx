@@ -204,7 +204,7 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
                     step="0.1"
                     name={field.name}
                     ref={field.ref}
-                    value={typeof field.value === "number" ? field.value : ""}
+                    value={field.value !== undefined && field.value !== null ? String(field.value) : ""}
                     onBlur={field.onBlur}
                     onChange={(event) => field.onChange(event.target.value)}
                   />
@@ -226,7 +226,7 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
                     step="1"
                     name={field.name}
                     ref={field.ref}
-                    value={typeof field.value === "number" ? field.value : ""}
+                    value={field.value !== undefined && field.value !== null ? String(field.value) : ""}
                     onBlur={field.onBlur}
                     onChange={(event) => field.onChange(event.target.value)}
                   />
@@ -248,7 +248,7 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
                     step="0.01"
                     name={field.name}
                     ref={field.ref}
-                    value={typeof field.value === "number" ? field.value : ""}
+                    value={field.value !== undefined && field.value !== null ? String(field.value) : ""}
                     onBlur={field.onBlur}
                     onChange={(event) => field.onChange(event.target.value)}
                   />
