@@ -9,7 +9,7 @@ export const metadata = {
   title: "Edit Driver",
 }
 
-export default async function EditDriverPage({ params }: { params: { id: string } }) {
+export default async function EditDriverPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
   const driver = await prisma.driver.findUnique({

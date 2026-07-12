@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma"
 import { driverSchema, type DriverFormValues } from "@/lib/validations/driver"
 import { revalidatePath } from "next/cache"
+import { auth } from "@/auth"
 
 export async function createDriver(data: DriverFormValues) {
   const result = driverSchema.safeParse(data)
@@ -86,5 +87,58 @@ export async function deleteDriver(id: string) {
   } catch (error) {
     console.error("Failed to delete driver:", error)
     return { error: "Failed to delete driver. Please try again later." }
+  }
+}
+
+export async function sendDriverExpiryReminder(driverId: string) {
+  const session = await auth()
+  const userId = session?.user?.id
+  const userEmail = session?.user?.email
+  if (!userId) {
+    return { error: "You must be logged in to trigger email reminders." }
+  }
+
+  try {
+    const driver = await prisma.driver.findUnique({
+      where: { id: driverId }
+    })
+
+    if (!driver) {
+      return { error: "Driver not found." }
+    }
+
+    console.log(`[EMAIL SEND SIMULATION] Sending email reminder to driver ${driver.name} at contact: ${driver.contactNumber} regarding license DL-${driver.licenseNumber} expiring on ${driver.licenseExpiry.toLocaleDateString()}`)
+
+    await prisma.$transaction(async (tx) => {
+      await tx.notification.create({
+        data: {
+          title: "License Expiry Reminder Sent",
+          description: `Email reminder sent to ${driver.name} for license ${driver.licenseNumber} (Expiry: ${driver.licenseExpiry.toLocaleDateString()})`,
+          type: "LICENSE_EXPIRY",
+          userId: userId,
+        }
+      })
+
+      await tx.auditLog.create({
+        data: {
+          entity: "Driver",
+          entityId: driver.id,
+          action: "UPDATE",
+          performedBy: userEmail || "System",
+          oldValue: "No reminder",
+          newValue: `Expiry reminder sent for license expiring on ${driver.licenseExpiry.toLocaleDateString()}`
+        }
+      })
+    })
+
+    revalidatePath("/dashboard/drivers")
+    revalidatePath("/dashboard")
+    return {
+      success: true,
+      emailBody: `Email Reminder Simulation\n-------------------------\nTo: ${driver.name}\nContact: ${driver.contactNumber}\nLicense Number: ${driver.licenseNumber}\nExpiry Date: ${driver.licenseExpiry.toLocaleDateString()}\n\nDear ${driver.name},\nYour driving license (${driver.licenseNumber}) is expiring on ${driver.licenseExpiry.toLocaleDateString()}. Please submit your renewal document as soon as possible.`,
+    }
+  } catch (error) {
+    console.error("Failed to send driver expiry reminder:", error)
+    return { error: "Failed to send expiry reminder. Please try again." }
   }
 }

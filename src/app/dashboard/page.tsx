@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   ])
 
   // Get data for charts
-  const [expenses, _fuelLogs, vehicles] = await Promise.all([
+  const [expenses, , vehicles] = await Promise.all([
     prisma.expense.findMany({
       where: { date: { gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } },
       orderBy: { date: "asc" }

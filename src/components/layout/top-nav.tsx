@@ -4,6 +4,8 @@ import * as React from "react"
 import { Bell, Search } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { getUserNotifications, markNotificationRead } from "@/app/dashboard/actions"
+import { Notification } from "@prisma/client"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -20,10 +22,29 @@ import {
 export function TopNav() {
   const { data: session } = useSession()
   const router = useRouter()
+  const [notifications, setNotifications] = React.useState<Notification[]>([])
 
   const userName = session?.user?.name || "User"
   const userEmail = session?.user?.email || ""
   const userInitials = userName.substring(0, 2).toUpperCase()
+
+  const fetchNotifications = React.useCallback(async () => {
+    const list = await getUserNotifications()
+    setNotifications(list)
+  }, [])
+
+  React.useEffect(() => {
+    if (session?.user?.id) {
+      fetchNotifications()
+    }
+  }, [session, fetchNotifications])
+
+  const unreadCount = notifications.filter(n => !n.read).length
+
+  const handleMarkRead = async (id: string) => {
+    await markNotificationRead(id)
+    fetchNotifications()
+  }
 
   return (
     <div className="flex flex-1 items-center justify-between gap-4 md:justify-end">
@@ -49,25 +70,45 @@ export function TopNav() {
             render={
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5 text-muted-foreground" />
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-600"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
+                    {unreadCount}
+                  </span>
+                )}
               </Button>
             }
           />
-          <DropdownMenuContent className="w-64" align="end">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+          <DropdownMenuContent className="w-80 max-h-96 overflow-y-auto" align="end">
+            <DropdownMenuLabel className="flex justify-between items-center">
+              <span>Notifications</span>
+              {unreadCount > 0 && (
+                <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">
+                  {unreadCount} New
+                </span>
+              )}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="text-sm font-medium">New Trip Assigned</span>
-              <span className="text-xs text-muted-foreground">
-                You have been assigned to trip TRP-1042
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="text-sm font-medium">Maintenance Alert</span>
-              <span className="text-xs text-muted-foreground">
-                Vehicle TRN-1015 requires oil change
-              </span>
-            </DropdownMenuItem>
+            {notifications.length === 0 ? (
+              <div className="text-center py-4 text-xs text-muted-foreground">
+                No notifications
+              </div>
+            ) : (
+              notifications.map((n) => (
+                <DropdownMenuItem
+                  key={n.id}
+                  onClick={() => handleMarkRead(n.id)}
+                  className={`flex flex-col items-start gap-1 p-3 cursor-pointer border-b last:border-b-0 ${
+                    !n.read ? "bg-muted/40 hover:bg-muted font-medium" : "opacity-80"
+                  }`}
+                >
+                  <span className="text-sm font-semibold">{n.title}</span>
+                  <span className="text-xs text-muted-foreground leading-relaxed">{n.description}</span>
+                  <span className="text-[9px] text-muted-foreground/60 mt-1">
+                    {new Date(n.createdAt).toLocaleString()}
+                  </span>
+                </DropdownMenuItem>
+              ))
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 

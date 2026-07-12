@@ -199,6 +199,7 @@ model MaintenanceLog {
   estimatedCost Decimal           @db.Decimal(10,2)
   actualCost    Decimal?          @db.Decimal(10,2)
   status        MaintenanceStatus @default(OPEN)
+  receiptUrl    String?
   
   vehicleId     String
   vehicle       Vehicle           @relation(fields: [vehicleId], references: [id])

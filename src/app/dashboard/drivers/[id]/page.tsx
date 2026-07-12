@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
-export default async function DriverDetailsPage({ params }: { params: { id: string } }) {
+export default async function DriverDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
   const driver = await prisma.driver.findUnique({

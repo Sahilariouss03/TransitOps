@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import prisma from "@/lib/prisma"
 import { DollarSign, Map, Fuel, Wrench } from "lucide-react"
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
+import { AnalyticsTable } from "@/components/analytics/analytics-table"
 
 export const metadata = {
   title: "Analytics - TransitOps",
@@ -22,7 +23,12 @@ export default async function AnalyticsPage() {
       orderBy: { date: "asc" }
     }),
     prisma.vehicle.findMany({
-      where: { deletedAt: null }
+      where: { deletedAt: null },
+      include: {
+        trips: { where: { deletedAt: null } },
+        fuelLogs: { where: { deletedAt: null } },
+        maintenanceLogs: { where: { deletedAt: null } }
+      }
     }),
     prisma.trip.count(),
     prisma.fuelLog.count(),
@@ -52,6 +58,36 @@ export default async function AnalyticsPage() {
   const totalRevenue = Number(totalRevenueResult._sum.revenue || 0)
   const totalExpense = Number(totalExpensesResult._sum.amount || 0)
   const netProfit = totalRevenue - totalExpense
+
+  // Calculate per-vehicle metrics
+  const vehicleMetrics = vehicles.map(vehicle => {
+    const completedTrips = vehicle.trips.filter(t => t.status === "COMPLETED")
+    const totalDistance = completedTrips.reduce((sum, t) => sum + (t.actualDistance || t.plannedDistance || 0), 0)
+    const totalFuelFromTrips = completedTrips.reduce((sum, t) => sum + (t.fuelConsumed || 0), 0)
+    
+    const fuelEfficiency = totalFuelFromTrips > 0 ? (totalDistance / totalFuelFromTrips) : 0
+    const totalFuelCost = vehicle.fuelLogs.reduce((sum, f) => sum + Number(f.cost), 0)
+    const totalMaintenanceCost = vehicle.maintenanceLogs.reduce((sum, m) => sum + Number(m.actualCost || m.estimatedCost || 0), 0)
+    const operationalCost = totalFuelCost + totalMaintenanceCost
+    const vehicleRevenue = completedTrips.reduce((sum, t) => sum + Number(t.revenue), 0)
+    const acquisitionCost = Number(vehicle.acquisitionCost)
+    const roi = acquisitionCost > 0 ? ((vehicleRevenue - operationalCost) / acquisitionCost) * 100 : 0
+    
+    return {
+      id: vehicle.id,
+      registrationNumber: vehicle.registrationNumber,
+      manufacturer: vehicle.manufacturer,
+      model: vehicle.model,
+      totalDistance,
+      totalFuelFromTrips,
+      fuelEfficiency,
+      totalFuelCost,
+      totalMaintenanceCost,
+      operationalCost,
+      totalRevenue: vehicleRevenue,
+      roi
+    }
+  })
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -113,7 +149,15 @@ export default async function AnalyticsPage() {
         utilizationData={utilizationData}
       />
       
-      {/* We could add more charts here easily, but reusing DashboardCharts is a fast MVP for the missing page */}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-xl font-bold tracking-tight">Fleet Vehicle Performance</h3>
+        <p className="text-sm text-muted-foreground">
+          Detailed metrics for each vehicle including efficiency, operational cost, and ROI.
+        </p>
+      </div>
+
+      <AnalyticsTable data={vehicleMetrics} />
+      
       <Card>
         <CardHeader>
           <CardTitle>Financial Summary</CardTitle>

@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "recharts",
+      "@base-ui/react",
+      "date-fns",
+      "framer-motion",
+    ],
+  },
 };
 
 export default nextConfig;

@@ -11,7 +11,7 @@ export const metadata = {
   title: "Edit Vehicle",
 }
 
-export default async function EditVehiclePage({ params }: { params: { id: string } }) {
+export default async function EditVehiclePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
   const [vehicle, regions] = await Promise.all([

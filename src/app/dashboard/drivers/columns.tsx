@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { MoreHorizontal, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, AlertTriangle, Mail } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 import { toast } from "sonner"
-import { deleteDriver } from "./actions"
+import { deleteDriver, sendDriverExpiryReminder } from "./actions"
 
 export type Driver = {
   id: string
@@ -24,6 +24,7 @@ export type Driver = {
   category: string
   safetyScore: number
   status: string
+  licenseExpiry: Date
 }
 
 export const columns: ColumnDef<Driver>[] = [
@@ -52,6 +53,34 @@ export const columns: ColumnDef<Driver>[] = [
   {
     accessorKey: "licenseNumber",
     header: "License Number",
+  },
+  {
+    accessorKey: "licenseExpiry",
+    header: "License Expiry",
+    cell: ({ row }) => {
+      const expiry = new Date(row.original.licenseExpiry)
+      const now = new Date()
+      const diffTime = expiry.getTime() - now.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+      let badgeColor = "text-muted-foreground"
+      let warningIcon = null
+
+      if (diffDays < 0) {
+        badgeColor = "text-red-500 font-bold flex items-center gap-1"
+        warningIcon = <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
+      } else if (diffDays <= 30) {
+        badgeColor = "text-amber-500 font-semibold flex items-center gap-1"
+        warningIcon = <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+      }
+
+      return (
+        <div className={badgeColor}>
+          {warningIcon}
+          {expiry.toLocaleDateString()}
+        </div>
+      )
+    }
   },
   {
     accessorKey: "category",
@@ -107,6 +136,22 @@ export const columns: ColumnDef<Driver>[] = [
               onClick={() => navigator.clipboard.writeText(driver.licenseNumber)}
             >
               Copy license
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-amber-600 focus:bg-amber-50 focus:text-amber-700 cursor-pointer"
+              onClick={async () => {
+                const res = await sendDriverExpiryReminder(driver.id)
+                if (res.error) {
+                  toast.error(res.error)
+                } else {
+                  toast.success("Simulated email reminder sent!")
+                  if (res.emailBody) {
+                    alert(res.emailBody)
+                  }
+                }
+              }}
+            >
+              <Mail className="h-4 w-4 mr-2" /> Send Email Reminder
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>

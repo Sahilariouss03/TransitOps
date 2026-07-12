@@ -1,23 +1,66 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { maintenanceSchema, type MaintenanceFormValues } from "@/lib/validations/maintenance"
+import { maintenanceSchema } from "@/lib/validations/maintenance"
 import { revalidatePath } from "next/cache"
-import { ExpenseCategory, VehicleStatus } from "@prisma/client"
+import { ExpenseCategory, VehicleStatus, MaintenanceType, Priority, MaintenanceStatus } from "@prisma/client"
+import { promises as fs } from "fs"
+import path from "path"
 
-export async function createMaintenanceLog(data: MaintenanceFormValues) {
-  const result = maintenanceSchema.safeParse(data)
+export async function createMaintenanceLog(formData: FormData) {
+  const vehicleId = formData.get("vehicleId") as string
+  const issue = formData.get("issue") as string
+  const type = formData.get("type") as MaintenanceType
+  const priority = formData.get("priority") as Priority
+  const date = formData.get("date") as string
+  const estimatedCost = Number(formData.get("estimatedCost"))
+  const actualCostVal = formData.get("actualCost")
+  const actualCost = actualCostVal ? Number(actualCostVal) : undefined
+  const status = formData.get("status") as MaintenanceStatus
+
+  const result = maintenanceSchema.safeParse({
+    vehicleId,
+    issue,
+    type,
+    priority,
+    date,
+    estimatedCost,
+    actualCost,
+    status
+  })
   
   if (!result.success) {
     return { error: "Invalid form data. Please check your inputs." }
   }
+
+  // Handle optional receipt file
+  const file = formData.get("file") as File | null
+  let receiptUrl: string | null = null
+
+  if (file && file.size > 0) {
+    try {
+      const bytes = await file.arrayBuffer()
+      const buffer = Buffer.from(bytes)
+      const uploadDir = path.join(process.cwd(), "public", "uploads")
+      await fs.mkdir(uploadDir, { recursive: true })
+
+      const uniqueFilename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_")}`
+      const filePath = path.join(uploadDir, uniqueFilename)
+      await fs.writeFile(filePath, buffer)
+      receiptUrl = `/uploads/${uniqueFilename}`
+    } catch (err) {
+      console.error("Failed to save receipt file:", err)
+      return { error: "Failed to save upload receipt. Please try again." }
+    }
+  }
   
   try {
     await prisma.$transaction(async (tx) => {
-      const _log = await tx.maintenanceLog.create({
+      await tx.maintenanceLog.create({
         data: {
           ...result.data,
           date: new Date(result.data.date),
+          receiptUrl,
         }
       })
       

@@ -27,6 +27,7 @@ export default async function MaintenancePage() {
     date: log.date,
     status: log.status,
     estimatedCost: Number(log.estimatedCost),
+    receiptUrl: log.receiptUrl,
   }))
 
   return (

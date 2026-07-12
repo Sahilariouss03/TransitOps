@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Edit, Activity, Gauge, MapPin, Wrench } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
+import { VehicleDocuments } from "@/components/vehicles/vehicle-documents"
 
-export default async function VehicleDetailPage({ params }: { params: { id: string } }) {
+export default async function VehicleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
   const vehicle = await prisma.vehicle.findUnique({
@@ -21,6 +22,10 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
       odometerHistory: {
         orderBy: { updatedAt: "desc" },
         take: 10
+      },
+      documents: {
+        where: { deletedAt: null },
+        orderBy: { createdAt: "desc" }
       }
     }
   })
@@ -163,15 +168,7 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
           </Card>
         </TabsContent>
         <TabsContent value="documents" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Vehicle Documents</CardTitle>
-              <CardDescription>Registration, Insurance, and Permits.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
-            </CardContent>
-          </Card>
+          <VehicleDocuments vehicleId={vehicle.id} documents={vehicle.documents} />
         </TabsContent>
       </Tabs>
     </div>

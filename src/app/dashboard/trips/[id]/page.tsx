@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CompleteForm } from "@/components/trips/complete-form"
 
-export default async function TripDetailsPage({ params }: { params: { id: string } }) {
+export default async function TripDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
   const trip = await prisma.trip.findUnique({

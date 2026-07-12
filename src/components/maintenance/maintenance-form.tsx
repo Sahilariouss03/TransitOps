@@ -36,6 +36,7 @@ interface MaintenanceFormProps {
 export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [file, setFile] = useState<File | null>(null)
   
   const form = useForm<z.input<typeof maintenanceSchema>, unknown, MaintenanceFormValues>({
     resolver: zodResolver(maintenanceSchema),
@@ -55,7 +56,22 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
     setIsLoading(true)
     
     try {
-      const res = await createMaintenanceLog(data)
+      const formData = new FormData()
+      formData.append("vehicleId", data.vehicleId)
+      formData.append("issue", data.issue)
+      formData.append("type", data.type)
+      formData.append("priority", data.priority)
+      formData.append("date", data.date)
+      formData.append("estimatedCost", String(data.estimatedCost))
+      if (data.actualCost !== undefined && data.actualCost !== null) {
+        formData.append("actualCost", String(data.actualCost))
+      }
+      formData.append("status", data.status)
+      if (file) {
+        formData.append("file", file)
+      }
+
+      const res = await createMaintenanceLog(formData)
       if (res.error) {
         toast.error(res.error)
         return
@@ -245,15 +261,34 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             )}
           />
           
-          <div className="md:col-span-2 border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-muted-foreground bg-muted/20">
+          <div className="md:col-span-2 border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-muted-foreground bg-muted/20 relative">
             <UploadCloud className="h-10 w-10 mb-2 text-muted-foreground/60" />
-            <p className="text-sm font-medium">Upload Receipt / Document (Mock)</p>
+            <p className="text-sm font-medium">Upload Receipt / Document</p>
             <p className="text-xs text-center mt-1 max-w-sm">
-              UploadThing integration requires API keys. For this hackathon scope, file attachments are stubbed.
+              {file ? `Selected file: ${file.name}` : "Select receipt image or PDF file to upload"}
             </p>
-            <Button type="button" variant="outline" className="mt-4" disabled>
-              Select File
-            </Button>
+            <div className="mt-4 flex gap-2">
+              <Button type="button" variant="outline" onClick={() => document.getElementById("receipt-upload")?.click()}>
+                {file ? "Change File" : "Select File"}
+              </Button>
+              {file && (
+                <Button type="button" variant="ghost" className="text-destructive" onClick={() => setFile(null)}>
+                  Clear
+                </Button>
+              )}
+            </div>
+            <input
+              id="receipt-upload"
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg"
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files
+                if (files && files.length > 0) {
+                  setFile(files[0])
+                }
+              }}
+            />
           </div>
         </div>
         

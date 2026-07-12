@@ -1,8 +1,12 @@
 import { auth } from "@/auth"
-import { SettingsForm } from "@/components/settings/settings-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import prisma from "@/lib/prisma"
 import { roleLabels, routeAccessRules } from "@/lib/rbac"
+import dynamic from "next/dynamic"
+
+const SettingsForm = dynamic(() => import("@/components/settings/settings-form").then(mod => mod.SettingsForm), {
+  ssr: true,
+})
 
 export const metadata = {
   title: "Settings - TransitOps",
@@ -11,19 +15,24 @@ export const metadata = {
 const editableRoles = new Set(["ADMIN", "FLEET_MANAGER"])
 
 export default async function SettingsPage() {
-  const [session, settings] = await Promise.all([
+  const [session, initialSettings] = await Promise.all([
     auth(),
-    prisma.appSettings.upsert({
+    prisma.appSettings.findUnique({
       where: { id: "default" },
-      update: {},
-      create: {
+    }),
+  ])
+
+  let settings = initialSettings
+  if (!settings) {
+    settings = await prisma.appSettings.create({
+      data: {
         id: "default",
         depotName: "Gandhinagar Depot GJ4",
         currency: "INR (Rs)",
         distanceUnit: "KILOMETERS",
       },
-    }),
-  ])
+    })
+  }
 
   const role = (session?.user as { role?: string } | undefined)?.role ?? "DRIVER"
   const canEdit = editableRoles.has(role)

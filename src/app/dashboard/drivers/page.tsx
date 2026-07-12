@@ -22,6 +22,7 @@ export default async function DriversPage() {
     category: d.category,
     safetyScore: d.safetyScore,
     status: d.status,
+    licenseExpiry: d.licenseExpiry,
   }))
 
   return (

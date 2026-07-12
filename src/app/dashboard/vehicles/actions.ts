@@ -3,6 +3,9 @@
 import prisma from "@/lib/prisma"
 import { vehicleSchema, type VehicleFormValues } from "@/lib/validations/vehicle"
 import { revalidatePath } from "next/cache"
+import { promises as fs } from "fs"
+import path from "path"
+import { DocumentType } from "@prisma/client"
 
 export async function createVehicle(data: VehicleFormValues) {
   const result = vehicleSchema.safeParse(data)
@@ -151,5 +154,61 @@ export async function getRegions() {
   } catch (error) {
     console.error("Failed to fetch regions:", error)
     return []
+  }
+}
+
+export async function uploadVehicleDocument(vehicleId: string, formData: FormData) {
+  try {
+    const file = formData.get("file") as File | null
+    if (!file) return { error: "No file selected." }
+
+    const documentType = formData.get("documentType") as DocumentType
+    if (!documentType) return { error: "Document type is required." }
+
+    const expiryDateStr = formData.get("expiryDate") as string | null
+    const expiryDate = expiryDateStr ? new Date(expiryDateStr) : null
+
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    const uploadDir = path.join(process.cwd(), "public", "uploads")
+    await fs.mkdir(uploadDir, { recursive: true })
+
+    const uniqueFilename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_")}`
+    const filePath = path.join(uploadDir, uniqueFilename)
+    await fs.writeFile(filePath, buffer)
+
+    const fileUrl = `/uploads/${uniqueFilename}`
+
+    await prisma.vehicleDocument.create({
+      data: {
+        vehicleId,
+        fileName: file.name,
+        fileUrl,
+        documentType,
+        expiryDate,
+      }
+    })
+
+    revalidatePath(`/dashboard/vehicles/${vehicleId}`)
+    return { success: true }
+  } catch (error) {
+    console.error("Failed to upload vehicle document:", error)
+    return { error: "Failed to upload document. Please try again." }
+  }
+}
+
+export async function deleteVehicleDocument(vehicleId: string, documentId: string) {
+  try {
+    await prisma.vehicleDocument.update({
+      where: { id: documentId },
+      data: { deletedAt: new Date() }
+    })
+
+    revalidatePath(`/dashboard/vehicles/${vehicleId}`)
+    return { success: true }
+  } catch (error) {
+    console.error("Failed to delete document:", error)
+    return { error: "Failed to delete document." }
   }
 }

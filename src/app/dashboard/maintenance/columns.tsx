@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { ArrowUpDown, CheckCircle, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, CheckCircle, MoreHorizontal, Download } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,7 @@ export type MaintenanceRow = {
   date: Date
   status: string
   estimatedCost: number
+  receiptUrl?: string | null
 }
 
 export const columns: ColumnDef<MaintenanceRow>[] = [
@@ -86,6 +87,24 @@ export const columns: ColumnDef<MaintenanceRow>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => <StatusBadge status={row.original.status} />,
+  },
+  {
+    accessorKey: "receiptUrl",
+    header: "Receipt",
+    cell: ({ row }) => {
+      const url = row.original.receiptUrl
+      if (!url) return <span className="text-muted-foreground text-xs">No receipt</span>
+      return (
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-semibold"
+        >
+          <Download className="h-3 w-3" /> View
+        </a>
+      )
+    }
   },
   {
     id: "actions",
