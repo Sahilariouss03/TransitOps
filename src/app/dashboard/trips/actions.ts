@@ -5,6 +5,12 @@ import { dispatchTripSchema, type DispatchTripFormValues, completeTripSchema, ty
 import { revalidatePath } from "next/cache"
 import { VehicleStatus, DriverStatus, TripStatus } from "@prisma/client"
 
+function getLicenseValidityCutoff() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today
+}
+
 export async function dispatchTrip(data: DispatchTripFormValues) {
   const result = dispatchTripSchema.safeParse(data)
   
@@ -14,9 +20,12 @@ export async function dispatchTrip(data: DispatchTripFormValues) {
   
   try {
     const { vehicleId, driverId, cargoWeight } = result.data
+    const licenseValidityCutoff = getLicenseValidityCutoff()
     
     // Validate Vehicle
-    const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } })
+    const vehicle = await prisma.vehicle.findFirst({
+      where: { id: vehicleId, deletedAt: null },
+    })
     if (!vehicle) return { error: "Vehicle not found." }
     if (vehicle.status !== VehicleStatus.AVAILABLE) return { error: "Vehicle is not available." }
     if (cargoWeight > vehicle.maxLoadCapacity) {
@@ -24,9 +33,14 @@ export async function dispatchTrip(data: DispatchTripFormValues) {
     }
     
     // Validate Driver
-    const driver = await prisma.driver.findUnique({ where: { id: driverId } })
+    const driver = await prisma.driver.findFirst({
+      where: { id: driverId, deletedAt: null },
+    })
     if (!driver) return { error: "Driver not found." }
     if (driver.status !== DriverStatus.AVAILABLE) return { error: "Driver is not available." }
+    if (driver.licenseExpiry < licenseValidityCutoff) {
+      return { error: "Driver license has expired and cannot be assigned to trips." }
+    }
     
     // Execute Dispatch in Transaction
     const trip = await prisma.$transaction(async (tx) => {
@@ -249,13 +263,21 @@ export async function cancelTrip(tripId: string) {
 }
 
 export async function getAvailableResources() {
+  const licenseValidityCutoff = getLicenseValidityCutoff()
+
   const [vehicles, drivers] = await Promise.all([
     prisma.vehicle.findMany({ 
       where: { status: VehicleStatus.AVAILABLE, deletedAt: null },
       orderBy: { registrationNumber: 'asc' }
     }),
     prisma.driver.findMany({ 
-      where: { status: DriverStatus.AVAILABLE, deletedAt: null },
+      where: {
+        status: DriverStatus.AVAILABLE,
+        deletedAt: null,
+        licenseExpiry: {
+          gte: licenseValidityCutoff,
+        },
+      },
       orderBy: { name: 'asc' }
     })
   ])
