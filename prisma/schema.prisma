@@ -1,0 +1,328 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          Role      @default(FLEET_MANAGER)
+  avatarUrl     String?
+  lastLogin     DateTime?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  
+  notifications Notification[]
+}
+
+enum Role {
+  FLEET_MANAGER
+  DRIVER
+  SAFETY_OFFICER
+  FINANCIAL_ANALYST
+}
+
+model Region {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  vehicles  Vehicle[]
+}
+
+model Vehicle {
+  id                 String          @id @default(uuid())
+  registrationNumber String          @unique
+  manufacturer       String
+  model              String
+  variant            String?
+  type               VehicleType
+  maxLoadCapacity    Float
+  currentOdometer    Float
+  acquisitionCost    Decimal         @db.Decimal(10,2)
+  status             VehicleStatus   @default(AVAILABLE)
+  
+  regionId           String
+  region             Region          @relation(fields: [regionId], references: [id])
+  
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  deletedAt          DateTime?
+  
+  trips              Trip[]
+  maintenanceLogs    MaintenanceLog[]
+  fuelLogs           FuelLog[]
+  documents          VehicleDocument[]
+  statusHistory      VehicleStatusHistory[]
+  odometerHistory    VehicleOdometer[]
+}
+
+enum VehicleType {
+  TRUCK
+  VAN
+  PICKUP
+  CAR
+  BIKE
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  ON_TRIP
+  IN_SHOP
+  RETIRED
+}
+
+model VehicleStatusHistory {
+  id        String        @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle       @relation(fields: [vehicleId], references: [id])
+  oldStatus VehicleStatus
+  newStatus VehicleStatus
+  reason    String?
+  changedBy String
+  createdAt DateTime      @default(now())
+}
+
+model VehicleOdometer {
+  id        String   @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  previous  Float
+  current   Float
+  tripId    String?
+  updatedAt DateTime @default(now())
+}
+
+model VehicleDocument {
+  id           String       @id @default(uuid())
+  vehicleId    String
+  vehicle      Vehicle      @relation(fields: [vehicleId], references: [id])
+  fileName     String
+  fileUrl      String
+  documentType DocumentType
+  expiryDate   DateTime?
+  createdAt    DateTime     @default(now())
+  deletedAt    DateTime?
+}
+
+enum DocumentType {
+  REGISTRATION
+  INSURANCE
+  PERMIT
+  OTHER
+}
+
+model Driver {
+  id            String       @id @default(uuid())
+  name          String
+  licenseNumber String       @unique
+  category      String
+  licenseExpiry DateTime
+  contactNumber String
+  safetyScore   Int          @default(100)
+  status        DriverStatus @default(AVAILABLE)
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  
+  trips         Trip[]
+}
+
+enum DriverStatus {
+  AVAILABLE
+  ON_TRIP
+  OFF_DUTY
+  SUSPENDED
+}
+
+model Trip {
+  id              String      @id @default(uuid())
+  source          String
+  destination     String
+  cargoWeight     Float
+  plannedDistance Float
+  actualDistance  Float?
+  revenue         Decimal     @db.Decimal(10,2)
+  status          TripStatus  @default(DRAFT)
+  
+  tripStart       DateTime?
+  tripEnd         DateTime?
+  fuelConsumed    Float?
+  remarks         String?
+  createdBy       String
+  
+  vehicleId       String
+  vehicle         Vehicle     @relation(fields: [vehicleId], references: [id])
+  driverId        String
+  driver          Driver      @relation(fields: [driverId], references: [id])
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+  
+  fuelLogs        FuelLog[]
+  expenses        Expense[]
+  history         TripHistory[]
+}
+
+enum TripStatus {
+  DRAFT
+  DISPATCHED
+  COMPLETED
+  CANCELLED
+}
+
+model TripHistory {
+  id        String     @id @default(uuid())
+  tripId    String
+  trip      Trip       @relation(fields: [tripId], references: [id])
+  status    TripStatus
+  remarks   String?
+  updatedBy String
+  createdAt DateTime   @default(now())
+}
+
+model MaintenanceLog {
+  id            String            @id @default(uuid())
+  issue         String
+  type          MaintenanceType
+  priority      Priority
+  date          DateTime
+  estimatedCost Decimal           @db.Decimal(10,2)
+  actualCost    Decimal?          @db.Decimal(10,2)
+  status        MaintenanceStatus @default(OPEN)
+  
+  vehicleId     String
+  vehicle       Vehicle           @relation(fields: [vehicleId], references: [id])
+  
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  deletedAt     DateTime?
+}
+
+enum MaintenanceType {
+  SERVICE
+  OIL_CHANGE
+  TIRE
+  ENGINE
+  ACCIDENT
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MaintenanceStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+}
+
+model FuelLog {
+  id        String    @id @default(uuid())
+  litres    Float
+  cost      Decimal   @db.Decimal(10,2)
+  fuelType  FuelType
+  date      DateTime
+  
+  vehicleId String
+  vehicle   Vehicle   @relation(fields: [vehicleId], references: [id])
+  tripId    String?
+  trip      Trip?     @relation(fields: [tripId], references: [id])
+  
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  CNG
+  EV
+  HYBRID
+}
+
+model Expense {
+  id       String          @id @default(uuid())
+  category ExpenseCategory
+  amount   Decimal         @db.Decimal(10,2)
+  date     DateTime
+  
+  tripId   String?
+  trip     Trip?           @relation(fields: [tripId], references: [id])
+  
+  createdAt DateTime       @default(now())
+  deletedAt DateTime?
+}
+
+enum ExpenseCategory {
+  FUEL
+  TOLL
+  REPAIR
+  MAINTENANCE
+  OTHER
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  title       String
+  description String
+  type        NotificationType
+  read        Boolean          @default(false)
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime         @default(now())
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+  LICENSE_EXPIRY
+  MAINTENANCE
+  TRIP
+  SYSTEM
+}
+
+model AuditLog {
+  id          String      @id @default(uuid())
+  entity      String
+  entityId    String
+  action      AuditAction
+  performedBy String
+  oldValue    String?
+  newValue    String?
+  
+  createdAt   DateTime    @default(now())
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  DISPATCH
+  COMPLETE
+  MAINTENANCE
+  UPLOAD_DOCUMENT
+}
+
+model DashboardMetric {
+  id        String   @id @default(uuid())
+  metric    String   @unique
+  value     String
+  updatedAt DateTime @default(now())
+}
