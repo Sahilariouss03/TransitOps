@@ -5,12 +5,27 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { TopNav } from "@/components/layout/top-nav"
 import { CommandPalette } from "@/components/layout/command-palette"
 import { PageTransition } from "@/components/ui/page-transition"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { toast } from "sonner"
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const denied = searchParams?.get("denied")
+
+  useEffect(() => {
+    if (denied) {
+      toast.error("Access Denied: You do not have permission to access that resource.")
+      // Remove query parameter from URL
+      const newUrl = window.location.pathname
+      router.replace(newUrl)
+    }
+  }, [denied, router])
   return (
     <SidebarProvider>
       <AppSidebar />
