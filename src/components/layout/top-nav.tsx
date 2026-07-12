@@ -24,8 +24,7 @@ export function TopNav() {
           variant="outline"
           className="relative h-9 w-full justify-start rounded-[0.5rem] bg-muted/50 text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-64 lg:w-80"
           onClick={() => {
-            // Will hook up to Command Palette
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))
+            document.dispatchEvent(new CustomEvent('open-command-palette'))
           }}
         >
           <Search className="mr-2 h-4 w-4" />
