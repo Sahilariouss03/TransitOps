@@ -125,7 +125,7 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Assign Vehicle</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select available vehicle" />
@@ -154,7 +154,7 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Assign Driver</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select available driver" />

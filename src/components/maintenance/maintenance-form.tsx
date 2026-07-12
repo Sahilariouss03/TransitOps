@@ -80,7 +80,7 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             render={({ field }) => (
               <FormItem className="md:col-span-2">
                 <FormLabel>Vehicle</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select vehicle for maintenance" />
@@ -119,7 +119,7 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Maintenance Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -145,7 +145,7 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Priority</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select priority" />
@@ -183,7 +183,7 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
