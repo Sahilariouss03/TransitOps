@@ -14,7 +14,7 @@ export async function createMaintenanceLog(data: MaintenanceFormValues) {
   
   try {
     await prisma.$transaction(async (tx) => {
-      const log = await tx.maintenanceLog.create({
+      const _log = await tx.maintenanceLog.create({
         data: {
           ...result.data,
           date: new Date(result.data.date),

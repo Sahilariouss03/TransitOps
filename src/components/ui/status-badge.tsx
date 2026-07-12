@@ -49,8 +49,8 @@ export function StatusBadge({ className, status, ...props }: StatusBadgeProps) {
     ? String(status).replace(/_/g, " ").replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
     : "Unknown"
 
-  // We cast status to any here because it accepts dynamic strings that might not be in the cva definition
-  const badgeStatus = status as any
+  // We cast status to VariantProps here because it accepts dynamic strings that might not be in the cva definition
+  const badgeStatus = status as VariantProps<typeof statusBadgeVariants>["status"]
 
   return (
     <div className={cn(statusBadgeVariants({ status: badgeStatus }), className)} {...props}>

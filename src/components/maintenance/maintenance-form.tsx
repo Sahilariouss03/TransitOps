@@ -63,7 +63,7 @@ export function MaintenanceForm({ vehicles }: MaintenanceFormProps) {
       toast.success("Maintenance log created successfully")
       router.push("/dashboard/maintenance")
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)

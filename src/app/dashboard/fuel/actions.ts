@@ -13,10 +13,10 @@ export async function createFuelLog(data: FuelLogFormValues) {
   }
   
   try {
-    const { vehicleId, tripId } = result.data
+    const { vehicleId: _vehicleId, tripId } = result.data
     
     await prisma.$transaction(async (tx) => {
-      const fuelLog = await tx.fuelLog.create({
+      const _fuelLog = await tx.fuelLog.create({
         data: {
           ...result.data,
           date: new Date(result.data.date),

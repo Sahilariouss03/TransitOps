@@ -6,7 +6,7 @@ export const driverSchema = z.object({
   category: z.string().min(1, "License category is required"),
   licenseExpiry: z.string().min(1, "License expiry date is required"),
   contactNumber: z.string().min(5, "Contact number is required").max(20),
-  status: z.enum(["AVAILABLE", "ON_TRIP", "OFF_DUTY", "SUSPENDED"]).default("AVAILABLE"),
+  status: z.enum(["AVAILABLE", "ON_TRIP", "OFF_DUTY", "SUSPENDED"]),
 })
 
 export type DriverFormValues = z.infer<typeof driverSchema>

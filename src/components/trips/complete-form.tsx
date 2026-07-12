@@ -58,7 +58,7 @@ export function CompleteForm({ tripId, vehicleCurrentOdometer, plannedDistance }
       toast.success("Trip completed successfully!")
       router.push(`/dashboard/trips/${tripId}`)
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)

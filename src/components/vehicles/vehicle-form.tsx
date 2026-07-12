@@ -74,7 +74,7 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
       
       router.push("/dashboard/vehicles")
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)

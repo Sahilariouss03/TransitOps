@@ -5,7 +5,7 @@ import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import prisma from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import { VehicleType, VehicleStatus } from "@prisma/client"
+
 
 export const metadata = {
   title: "Edit Vehicle",

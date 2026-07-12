@@ -9,7 +9,7 @@ export const vehicleSchema = z.object({
   maxLoadCapacity: z.coerce.number().min(0, "Capacity cannot be negative"),
   currentOdometer: z.coerce.number().min(0, "Odometer cannot be negative"),
   acquisitionCost: z.coerce.number().min(0, "Cost cannot be negative"),
-  status: z.enum(["AVAILABLE", "ON_TRIP", "IN_SHOP", "RETIRED"]).default("AVAILABLE"),
+  status: z.enum(["AVAILABLE", "ON_TRIP", "IN_SHOP", "RETIRED"]),
   regionId: z.string().min(1, "Region is required"),
 })
 

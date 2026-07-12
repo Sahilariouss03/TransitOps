@@ -32,7 +32,7 @@ export function ExpenseForm() {
   const [isLoading, setIsLoading] = useState(false)
   
   const form = useForm<ExpenseFormValues>({
-    resolver: zodResolver(expenseSchema),
+    resolver: zodResolver(expenseSchema) as any,
     defaultValues: {
       category: "OTHER",
       amount: 0,
@@ -54,7 +54,7 @@ export function ExpenseForm() {
       toast.success("Expense logged successfully")
       router.push("/dashboard/expenses")
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)
@@ -80,10 +80,8 @@ export function ExpenseForm() {
                   <SelectContent>
                     <SelectItem value="FUEL">Fuel</SelectItem>
                     <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                    <SelectItem value="SALARY">Salary / Wages</SelectItem>
+                    <SelectItem value="REPAIR">Repair</SelectItem>
                     <SelectItem value="TOLL">Tolls & Parking</SelectItem>
-                    <SelectItem value="INSURANCE">Insurance</SelectItem>
-                    <SelectItem value="OFFICE">Office / Admin</SelectItem>
                     <SelectItem value="OTHER">Other</SelectItem>
                   </SelectContent>
                 </Select>

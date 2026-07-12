@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import prisma from "@/lib/prisma"
-import { Clock, Navigation, CheckCircle2, AlertTriangle, Truck } from "lucide-react"
+import { Clock, Navigation, CheckCircle2, Truck } from "lucide-react"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
 
@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   ])
 
   // Get data for charts
-  const [expenses, fuelLogs, vehicles] = await Promise.all([
+  const [expenses, _fuelLogs, vehicles] = await Promise.all([
     prisma.expense.findMany({
       where: { date: { gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } },
       orderBy: { date: "asc" }
@@ -54,7 +54,7 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-1">
         <h2 className="text-3xl font-bold tracking-tight">Overview</h2>
         <p className="text-muted-foreground">
-          Welcome back. Here is what's happening across your fleet today.
+          Welcome back. Here is what&apos;s happening across your fleet today.
         </p>
       </div>
 

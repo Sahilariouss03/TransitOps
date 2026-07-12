@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { Driver, Vehicle } from "@prisma/client"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -30,8 +31,8 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface DispatchFormProps {
-  vehicles: any[]
-  drivers: any[]
+  vehicles: Vehicle[]
+  drivers: Driver[]
 }
 
 export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
@@ -71,7 +72,7 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
       toast.success("Trip dispatched successfully!")
       router.push("/dashboard/trips")
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)

@@ -36,7 +36,7 @@ export function DriverForm({ initialData }: DriverFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   
   const form = useForm<DriverFormValues>({
-    resolver: zodResolver(driverSchema),
+    resolver: zodResolver(driverSchema) as any,
     defaultValues: initialData || {
       name: "",
       licenseNumber: "",
@@ -69,7 +69,7 @@ export function DriverForm({ initialData }: DriverFormProps) {
       
       router.push("/dashboard/drivers")
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)

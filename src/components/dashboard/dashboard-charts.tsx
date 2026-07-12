@@ -10,7 +10,7 @@ interface DashboardChartsProps {
   utilizationData: { name: string; used: number; total: number }[]
 }
 
-export function DashboardCharts({ expensesData, statusPieData, utilizationData }: DashboardChartsProps) {
+export function DashboardCharts({ expensesData: _expensesData, statusPieData, utilizationData: _utilizationData }: DashboardChartsProps) {
   // Extract values for status chart
   const available = statusPieData.find(d => d.name === "Available")?.value || 0
   const onTrip = statusPieData.find(d => d.name === "On Trip")?.value || 0
