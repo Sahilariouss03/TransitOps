@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Loader2, AlertCircle } from "lucide-react"
+import { z } from "zod"
 
 import { completeTripSchema, type CompleteTripFormValues } from "@/lib/validations/trip"
 import { completeTrip } from "@/app/dashboard/trips/actions"
@@ -33,7 +34,7 @@ export function CompleteForm({ tripId, vehicleCurrentOdometer, plannedDistance }
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   
-  const form = useForm<CompleteTripFormValues>({
+  const form = useForm<z.input<typeof completeTripSchema>, unknown, CompleteTripFormValues>({
     resolver: zodResolver(completeTripSchema),
     defaultValues: {
       actualDistance: plannedDistance,
@@ -58,7 +59,7 @@ export function CompleteForm({ tripId, vehicleCurrentOdometer, plannedDistance }
       toast.success("Trip completed successfully!")
       router.push(`/dashboard/trips/${tripId}`)
       router.refresh()
-    } catch (_error) {
+    } catch {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)
@@ -85,7 +86,15 @@ export function CompleteForm({ tripId, vehicleCurrentOdometer, plannedDistance }
               <FormItem>
                 <FormLabel>Actual Distance (km)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.1" {...field} />
+                  <Input
+                    type="number"
+                    step="0.1"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -99,7 +108,15 @@ export function CompleteForm({ tripId, vehicleCurrentOdometer, plannedDistance }
               <FormItem>
                 <FormLabel>Closing Odometer (km)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.1" {...field} />
+                  <Input
+                    type="number"
+                    step="0.1"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <p className="text-xs text-muted-foreground mt-1">
                   Must be {'>'}= {vehicleCurrentOdometer}
@@ -116,7 +133,15 @@ export function CompleteForm({ tripId, vehicleCurrentOdometer, plannedDistance }
               <FormItem>
                 <FormLabel>Fuel Consumed (Litres)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.1" {...field} />
+                  <Input
+                    type="number"
+                    step="0.1"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { z } from "zod"
 
 import { expenseSchema, type ExpenseFormValues } from "@/lib/validations/expense"
 import { createExpense } from "@/app/dashboard/expenses/actions"
@@ -31,8 +32,7 @@ export function ExpenseForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
-  const form = useForm<ExpenseFormValues>({
-    // @ts-expect-error React Hook Form type mismatch with zod coerced numbers
+  const form = useForm<z.input<typeof expenseSchema>, unknown, ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
       category: "OTHER",
@@ -55,7 +55,7 @@ export function ExpenseForm() {
       toast.success("Expense logged successfully")
       router.push("/dashboard/expenses")
       router.refresh()
-    } catch (_error) {
+    } catch {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)
@@ -98,7 +98,15 @@ export function ExpenseForm() {
               <FormItem>
                 <FormLabel>Amount ($)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

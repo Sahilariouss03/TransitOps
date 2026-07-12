@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { z } from "zod"
 
 import { fuelLogSchema, type FuelLogFormValues } from "@/lib/validations/fuel"
 import { createFuelLog, getTripsForVehicle } from "@/app/dashboard/fuel/actions"
@@ -35,7 +36,7 @@ export function FuelForm({ vehicles }: FuelFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
-  const form = useForm<FuelLogFormValues>({
+  const form = useForm<z.input<typeof fuelLogSchema>, unknown, FuelLogFormValues>({
     resolver: zodResolver(fuelLogSchema),
     defaultValues: {
       vehicleId: "",
@@ -81,7 +82,7 @@ export function FuelForm({ vehicles }: FuelFormProps) {
       toast.success("Fuel log created successfully")
       router.push("/dashboard/fuel")
       router.refresh()
-    } catch (_error) {
+    } catch {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)
@@ -149,7 +150,15 @@ export function FuelForm({ vehicles }: FuelFormProps) {
               <FormItem>
                 <FormLabel>Volume (Litres/kWh)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.1" {...field} />
+                  <Input
+                    type="number"
+                    step="0.1"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -163,7 +172,15 @@ export function FuelForm({ vehicles }: FuelFormProps) {
               <FormItem>
                 <FormLabel>Total Cost ($)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

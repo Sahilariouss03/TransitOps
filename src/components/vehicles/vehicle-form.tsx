@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { z } from "zod"
 
 import { vehicleSchema, type VehicleFormValues } from "@/lib/validations/vehicle"
 import { createVehicle, updateVehicle } from "@/app/dashboard/vehicles/actions"
@@ -36,7 +37,7 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
-  const form = useForm<VehicleFormValues>({
+  const form = useForm<z.input<typeof vehicleSchema>, unknown, VehicleFormValues>({
     resolver: zodResolver(vehicleSchema),
     defaultValues: initialData || {
       registrationNumber: "",
@@ -74,7 +75,7 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
       
       router.push("/dashboard/vehicles")
       router.refresh()
-    } catch (_error) {
+    } catch {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)
@@ -198,7 +199,15 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
               <FormItem>
                 <FormLabel>Max Load Capacity (Tons)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.1" {...field} />
+                  <Input
+                    type="number"
+                    step="0.1"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -212,7 +221,15 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
               <FormItem>
                 <FormLabel>Current Odometer (km)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="1" {...field} />
+                  <Input
+                    type="number"
+                    step="1"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -226,7 +243,15 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
               <FormItem>
                 <FormLabel>Acquisition Cost ($)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

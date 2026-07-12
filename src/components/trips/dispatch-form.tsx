@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Loader2, AlertCircle } from "lucide-react"
+import { z } from "zod"
 
 import { dispatchTripSchema, type DispatchTripFormValues } from "@/lib/validations/trip"
 import { dispatchTrip } from "@/app/dashboard/trips/actions"
@@ -40,7 +41,7 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   
-  const form = useForm<DispatchTripFormValues>({
+  const form = useForm<z.input<typeof dispatchTripSchema>, unknown, DispatchTripFormValues>({
     resolver: zodResolver(dispatchTripSchema),
     defaultValues: {
       source: "",
@@ -72,7 +73,7 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
       toast.success("Trip dispatched successfully!")
       router.push("/dashboard/trips")
       router.refresh()
-    } catch (_error) {
+    } catch {
       toast.error("Something went wrong.")
     } finally {
       setIsLoading(false)
@@ -185,7 +186,15 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
               <FormItem>
                 <FormLabel>Cargo Weight (Tons)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.1" {...field} />
+                  <Input
+                    type="number"
+                    step="0.1"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 {selectedVehicle && (
                   <p className="text-xs text-muted-foreground mt-1">
@@ -204,7 +213,15 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
               <FormItem>
                 <FormLabel>Planned Distance (km)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="1" {...field} />
+                  <Input
+                    type="number"
+                    step="1"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -218,7 +235,15 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
               <FormItem>
                 <FormLabel>Expected Revenue ($)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    name={field.name}
+                    ref={field.ref}
+                    value={typeof field.value === "number" ? field.value : ""}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
