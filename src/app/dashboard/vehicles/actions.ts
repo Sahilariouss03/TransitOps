@@ -28,9 +28,9 @@ export async function createVehicle(data: VehicleFormValues) {
       const vehicle = await tx.vehicle.create({
         data: {
           ...result.data,
-          // Convert maxLoadCapacity from string/number to Float, same for odometer
           maxLoadCapacity: Number(result.data.maxLoadCapacity),
           currentOdometer: Number(result.data.currentOdometer),
+          acquisitionCost: result.data.acquisitionCost !== undefined && result.data.acquisitionCost !== null ? result.data.acquisitionCost : null,
         }
       })
       
@@ -116,6 +116,7 @@ export async function updateVehicle(id: string, data: VehicleFormValues) {
           ...result.data,
           maxLoadCapacity: Number(result.data.maxLoadCapacity),
           currentOdometer: Number(result.data.currentOdometer),
+          acquisitionCost: result.data.acquisitionCost !== undefined && result.data.acquisitionCost !== null ? result.data.acquisitionCost : null,
         }
       })
     })
