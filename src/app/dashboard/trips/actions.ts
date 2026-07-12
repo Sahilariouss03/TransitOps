@@ -23,13 +23,25 @@ export async function dispatchTrip(data: DispatchTripFormValues) {
     const licenseValidityCutoff = getLicenseValidityCutoff()
     
     // Validate Vehicle
-    const vehicle = await prisma.vehicle.findFirst({
-      where: { id: vehicleId, deletedAt: null },
-    })
+    const [vehicle, settings] = await Promise.all([
+      prisma.vehicle.findFirst({
+        where: { id: vehicleId, deletedAt: null },
+      }),
+      prisma.appSettings.findUnique({
+        where: { id: "default" }
+      })
+    ])
     if (!vehicle) return { error: "Vehicle not found." }
     if (vehicle.status !== VehicleStatus.AVAILABLE) return { error: "Vehicle is not available." }
     if (cargoWeight > vehicle.maxLoadCapacity) {
-      return { error: `Cargo weight (${cargoWeight}T) exceeds vehicle capacity (${vehicle.maxLoadCapacity}T).` }
+      const weightUnit = settings?.weightUnit || "TONS"
+      const formatWeightMsg = (wInTons: number) => {
+        if (weightUnit === "KILOGRAMS") {
+          return `${(wInTons * 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })} kg`
+        }
+        return `${wInTons.toLocaleString(undefined, { maximumFractionDigits: 2 })} Tons`
+      }
+      return { error: `Cargo weight (${formatWeightMsg(cargoWeight)}) exceeds vehicle capacity (${formatWeightMsg(vehicle.maxLoadCapacity)}).` }
     }
     
     // Validate Driver

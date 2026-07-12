@@ -152,7 +152,7 @@ export function DispatchForm({ vehicles, drivers, weightUnit }: DispatchFormProp
                     ) : (
                       vehicles.map((v) => (
                         <SelectItem key={v.id} value={v.id}>
-                          {v.registrationNumber} - {v.manufacturer} (Max: {v.maxLoadCapacity}T)
+                          {v.registrationNumber} - {v.manufacturer} (Max: {formatWeight(v.maxLoadCapacity, weightUnit)})
                         </SelectItem>
                       ))
                     )}
