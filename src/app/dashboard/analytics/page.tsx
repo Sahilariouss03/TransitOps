@@ -63,7 +63,8 @@ export default async function AnalyticsPage() {
   const isINR = currencyCode.includes("INR")
 
   const totalRevenue = Number(totalRevenueResult._sum.revenue || 0)
-  const totalExpense = Number(totalExpensesResult._sum.amount || 0)
+  const totalAcquisitionCost = vehicles.reduce((sum, v) => sum + Number(v.acquisitionCost || 0), 0)
+  const totalExpense = Number(totalExpensesResult._sum.amount || 0) + totalAcquisitionCost
   const netProfit = totalRevenue - totalExpense
 
   const formatCurrency = (val: number) => {

@@ -14,16 +14,22 @@ export const metadata = {
 export default async function EditVehiclePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
-  const [vehicle, regions] = await Promise.all([
+  const [vehicle, regions, settings] = await Promise.all([
     prisma.vehicle.findUnique({
       where: { id }
     }),
-    getRegions()
+    getRegions(),
+    prisma.appSettings.findUnique({
+      where: { id: "default" }
+    })
   ])
 
   if (!vehicle) {
     notFound()
   }
+
+  const weightUnit = settings?.weightUnit || "TONS"
+  const currencyCode = settings?.currency || "INR"
 
   // We map the Prisma model to our form values
   const initialData = {
@@ -35,7 +41,7 @@ export default async function EditVehiclePage({ params }: { params: Promise<{ id
     type: vehicle.type,
     maxLoadCapacity: Number(vehicle.maxLoadCapacity),
     currentOdometer: Number(vehicle.currentOdometer),
-    acquisitionCost: Number(vehicle.acquisitionCost),
+    acquisitionCost: vehicle.acquisitionCost !== null ? Number(vehicle.acquisitionCost) : null,
     status: vehicle.status,
     regionId: vehicle.regionId,
   }
@@ -55,7 +61,12 @@ export default async function EditVehiclePage({ params }: { params: Promise<{ id
       </div>
       
       <div className="max-w-3xl rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-        <VehicleForm regions={regions} initialData={initialData} />
+        <VehicleForm 
+          regions={regions} 
+          initialData={initialData} 
+          weightUnit={weightUnit} 
+          currencyCode={currencyCode} 
+        />
       </div>
     </div>
   )

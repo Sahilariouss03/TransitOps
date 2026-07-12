@@ -6,30 +6,45 @@ import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CompleteForm } from "@/components/trips/complete-form"
+import { formatWeight } from "@/lib/utils"
 
 export default async function TripDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
-  const trip = await prisma.trip.findUnique({
-    where: { id },
-    include: {
-      vehicle: true,
-      driver: true,
-      history: {
-        orderBy: { createdAt: "desc" }
+  const [trip, settings] = await Promise.all([
+    prisma.trip.findUnique({
+      where: { id },
+      include: {
+        vehicle: true,
+        driver: true,
+        history: {
+          orderBy: { createdAt: "desc" }
+        }
       }
-    }
-  })
+    }),
+    prisma.appSettings.findUnique({
+      where: { id: "default" }
+    })
+  ])
 
   if (!trip) {
     notFound()
   }
 
   const isDispatched = trip.status === "DISPATCHED"
+  const weightUnit = settings?.weightUnit || "TONS"
+  const currencyCode = settings?.currency || "INR"
+  const isINR = currencyCode.includes("INR")
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat(isINR ? "en-IN" : "en-US", {
+      style: "currency",
+      currency: isINR ? "INR" : "USD",
+    }).format(val)
+  }
 
   return (
     <div className="flex flex-col gap-6 p-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b pb-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/trips" className={buttonVariants({ variant: "outline", size: "icon" })}>
             <ArrowLeft className="h-4 w-4" />
@@ -80,7 +95,7 @@ export default async function TripDetailsPage({ params }: { params: Promise<{ id
             <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Cargo Weight</p>
-                <p className="text-lg font-bold">{trip.cargoWeight} Tons</p>
+                <p className="text-lg font-bold">{formatWeight(trip.cargoWeight, weightUnit)}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Planned Dist.</p>
@@ -92,7 +107,7 @@ export default async function TripDetailsPage({ params }: { params: Promise<{ id
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Est. Revenue</p>
-                <p className="text-lg font-bold">${trip.revenue.toString()}</p>
+                <p className="text-lg font-bold">{formatCurrency(Number(trip.revenue))}</p>
               </div>
             </div>
           </CardContent>

@@ -7,32 +7,40 @@ import { ArrowLeft, Edit, Activity, Gauge, MapPin, Wrench } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { VehicleDocuments } from "@/components/vehicles/vehicle-documents"
+import { formatWeight } from "@/lib/utils"
 
 export default async function VehicleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
-  const vehicle = await prisma.vehicle.findUnique({
-    where: { id },
-    include: {
-      region: true,
-      statusHistory: {
-        orderBy: { createdAt: "desc" },
-        take: 10
-      },
-      odometerHistory: {
-        orderBy: { updatedAt: "desc" },
-        take: 10
-      },
-      documents: {
-        where: { deletedAt: null },
-        orderBy: { createdAt: "desc" }
+  const [vehicle, settings] = await Promise.all([
+    prisma.vehicle.findUnique({
+      where: { id },
+      include: {
+        region: true,
+        statusHistory: {
+          orderBy: { createdAt: "desc" },
+          take: 10
+        },
+        odometerHistory: {
+          orderBy: { updatedAt: "desc" },
+          take: 10
+        },
+        documents: {
+          where: { deletedAt: null },
+          orderBy: { createdAt: "desc" }
+        }
       }
-    }
-  })
+    }),
+    prisma.appSettings.findUnique({
+      where: { id: "default" }
+    })
+  ])
 
   if (!vehicle) {
     notFound()
   }
+
+  const weightUnit = settings?.weightUnit || "TONS"
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -79,7 +87,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {vehicle.maxLoadCapacity} kg
+              {formatWeight(vehicle.maxLoadCapacity, weightUnit)}
             </div>
           </CardContent>
         </Card>

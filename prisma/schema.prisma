@@ -46,7 +46,7 @@ model Vehicle {
   type               VehicleType
   maxLoadCapacity    Float
   currentOdometer    Float
-  acquisitionCost    Decimal         @db.Decimal(10,2)
+  acquisitionCost    Decimal?        @db.Decimal(10,2)
   status             VehicleStatus   @default(AVAILABLE)
   
   regionId           String
@@ -335,6 +335,7 @@ model AppSettings {
   depotName    String
   currency     String
   distanceUnit DistanceUnit @default(KILOMETERS)
+  weightUnit   WeightUnit   @default(TONS)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }
@@ -342,4 +343,9 @@ model AppSettings {
 enum DistanceUnit {
   KILOMETERS
   MILES
+}
+
+enum WeightUnit {
+  KILOGRAMS
+  TONS
 }

@@ -10,6 +10,7 @@ import { z } from "zod"
 
 import { dispatchTripSchema, type DispatchTripFormValues } from "@/lib/validations/trip"
 import { dispatchTrip } from "@/app/dashboard/trips/actions"
+import { convertWeightToStorage, formatWeight } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -34,9 +35,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 interface DispatchFormProps {
   vehicles: Vehicle[]
   drivers: Driver[]
+  weightUnit: string
 }
 
-export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
+export function DispatchForm({ vehicles, drivers, weightUnit }: DispatchFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -63,7 +65,11 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
     setErrorMsg(null)
     
     try {
-      const res = await dispatchTrip(data)
+      const storageData = {
+        ...data,
+        cargoWeight: convertWeightToStorage(data.cargoWeight, weightUnit),
+      }
+      const res = await dispatchTrip(storageData)
       if (res.error) {
         setErrorMsg(res.error)
         toast.error("Failed to dispatch trip")
@@ -198,7 +204,7 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
             name="cargoWeight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cargo Weight (Tons)</FormLabel>
+                <FormLabel>Cargo Weight ({weightUnit === "KILOGRAMS" ? "kg" : "Tons"})</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -212,7 +218,7 @@ export function DispatchForm({ vehicles, drivers }: DispatchFormProps) {
                 </FormControl>
                 {selectedVehicle && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Vehicle Max Capacity: {selectedVehicle.maxLoadCapacity}T
+                    Vehicle Max Capacity: {formatWeight(selectedVehicle.maxLoadCapacity, weightUnit)}
                   </p>
                 )}
                 <FormMessage />

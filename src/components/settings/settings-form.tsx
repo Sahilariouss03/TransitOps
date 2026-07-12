@@ -122,7 +122,15 @@ export function SettingsForm({ canEdit, defaultValues }: SettingsFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Distance Unit</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!canEdit || isPending}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!canEdit || isPending}
+                      items={[
+                        { value: "KILOMETERS", label: "Kilometers" },
+                        { value: "MILES", label: "Miles" }
+                      ]}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select a distance unit" />
@@ -131,6 +139,35 @@ export function SettingsForm({ canEdit, defaultValues }: SettingsFormProps) {
                       <SelectContent>
                         <SelectItem value="KILOMETERS">Kilometers</SelectItem>
                         <SelectItem value="MILES">Miles</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="weightUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Weight Unit</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!canEdit || isPending}
+                      items={[
+                        { value: "KILOGRAMS", label: "Kilograms (kg)" },
+                        { value: "TONS", label: "Tons (T)" }
+                      ]}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a weight unit" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="KILOGRAMS">Kilograms (kg)</SelectItem>
+                        <SelectItem value="TONS">Tons (T)</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

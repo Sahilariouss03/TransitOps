@@ -30,6 +30,7 @@ export default async function SettingsPage() {
         depotName: "Gandhinagar Depot GJ4",
         currency: "INR (Rs)",
         distanceUnit: "KILOMETERS",
+        weightUnit: "TONS",
       },
     })
   }
@@ -53,6 +54,7 @@ export default async function SettingsPage() {
             depotName: settings.depotName,
             currency: settings.currency,
             distanceUnit: settings.distanceUnit,
+            weightUnit: settings.weightUnit,
           }}
         />
 

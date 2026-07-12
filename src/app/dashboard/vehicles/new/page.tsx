@@ -3,13 +3,22 @@ import { VehicleForm } from "@/components/vehicles/vehicle-form"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
+import prisma from "@/lib/prisma"
 
 export const metadata = {
   title: "Add New Vehicle",
 }
 
 export default async function NewVehiclePage() {
-  const regions = await getRegions()
+  const [regions, settings] = await Promise.all([
+    getRegions(),
+    prisma.appSettings.findUnique({
+      where: { id: "default" }
+    })
+  ])
+
+  const weightUnit = settings?.weightUnit || "TONS"
+  const currencyCode = settings?.currency || "INR"
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -26,7 +35,11 @@ export default async function NewVehiclePage() {
       </div>
       
       <div className="max-w-3xl rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-        <VehicleForm regions={regions} />
+        <VehicleForm 
+          regions={regions} 
+          weightUnit={weightUnit} 
+          currencyCode={currencyCode} 
+        />
       </div>
     </div>
   )

@@ -8,6 +8,8 @@ import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { z } from "zod"
 
+import { convertWeightToDisplay, convertWeightToStorage } from "@/lib/utils"
+
 import { vehicleSchema, type VehicleFormValues } from "@/lib/validations/vehicle"
 import { createVehicle, updateVehicle } from "@/app/dashboard/vehicles/actions"
 import { Button } from "@/components/ui/button"
@@ -31,41 +33,54 @@ import {
 interface VehicleFormProps {
   initialData?: VehicleFormValues & { id?: string }
   regions: { id: string; name: string }[]
+  weightUnit: string
+  currencyCode: string
 }
 
-export function VehicleForm({ initialData, regions }: VehicleFormProps) {
+export function VehicleForm({ initialData, regions, weightUnit, currencyCode }: VehicleFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
   const form = useForm<z.input<typeof vehicleSchema>, unknown, VehicleFormValues>({
     resolver: zodResolver(vehicleSchema),
-    defaultValues: initialData || {
-      registrationNumber: "",
-      manufacturer: "",
-      model: "",
-      variant: "",
-      type: "TRUCK",
-      maxLoadCapacity: 0,
-      currentOdometer: 0,
-      acquisitionCost: 0,
-      status: "AVAILABLE",
-      regionId: "",
-    },
+    defaultValues: initialData
+      ? {
+          ...initialData,
+          maxLoadCapacity: convertWeightToDisplay(initialData.maxLoadCapacity, weightUnit),
+          acquisitionCost: initialData.acquisitionCost !== null && initialData.acquisitionCost !== undefined ? Number(initialData.acquisitionCost) : undefined,
+        }
+      : {
+          registrationNumber: "",
+          manufacturer: "",
+          model: "",
+          variant: "",
+          type: "TRUCK",
+          maxLoadCapacity: 0,
+          currentOdometer: 0,
+          acquisitionCost: undefined,
+          status: "AVAILABLE",
+          regionId: "",
+        },
   })
   
   async function onSubmit(data: VehicleFormValues) {
     setIsLoading(true)
     
     try {
+      const storageData = {
+        ...data,
+        maxLoadCapacity: convertWeightToStorage(data.maxLoadCapacity, weightUnit),
+      }
+      
       if (initialData?.id) {
-        const res = await updateVehicle(initialData.id, data)
+        const res = await updateVehicle(initialData.id, storageData)
         if (res.error) {
           toast.error(res.error)
           return
         }
         toast.success("Vehicle updated successfully")
       } else {
-        const res = await createVehicle(data)
+        const res = await createVehicle(storageData)
         if (res.error) {
           toast.error(res.error)
           return
@@ -211,7 +226,7 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
             name="maxLoadCapacity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Max Load Capacity (Tons)</FormLabel>
+                <FormLabel>Max Load Capacity ({weightUnit === "KILOGRAMS" ? "kg" : "Tons"})</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -255,7 +270,7 @@ export function VehicleForm({ initialData, regions }: VehicleFormProps) {
             name="acquisitionCost"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Acquisition Cost ($)</FormLabel>
+                <FormLabel>Acquisition Cost ({currencyCode === "INR" ? "₹" : "$"})</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
