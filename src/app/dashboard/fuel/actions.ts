@@ -51,3 +51,18 @@ export async function getVehiclesForFuel() {
     select: { id: true, registrationNumber: true, type: true }
   })
 }
+
+export async function getTripsForVehicle(vehicleId: string) {
+  if (!vehicleId) return []
+  
+  return await prisma.trip.findMany({
+    where: { 
+      vehicleId,
+      deletedAt: null,
+      // Allow logging fuel for active or recently completed trips
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    select: { id: true, source: true, destination: true, status: true, createdAt: true }
+  })
+}

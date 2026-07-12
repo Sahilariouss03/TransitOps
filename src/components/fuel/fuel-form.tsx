@@ -3,12 +3,12 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
 import { fuelLogSchema, type FuelLogFormValues } from "@/lib/validations/fuel"
-import { createFuelLog } from "@/app/dashboard/fuel/actions"
+import { createFuelLog, getTripsForVehicle } from "@/app/dashboard/fuel/actions"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -47,11 +47,32 @@ export function FuelForm({ vehicles }: FuelFormProps) {
     },
   })
   
+  const selectedVehicleId = form.watch("vehicleId")
+  const [vehicleTrips, setVehicleTrips] = useState<{ id: string; source: string; destination: string; createdAt: Date }[]>([])
+  
+  useEffect(() => {
+    if (selectedVehicleId) {
+      getTripsForVehicle(selectedVehicleId).then((trips) => {
+        setVehicleTrips(trips)
+      }).catch(err => {
+        console.error("Failed to load trips", err)
+      })
+    } else {
+      setVehicleTrips([])
+    }
+  }, [selectedVehicleId])
+  
   async function onSubmit(data: FuelLogFormValues) {
     setIsLoading(true)
     
+    // Handle 'none' value from select dropdown
+    const submitData = {
+      ...data,
+      tripId: data.tripId === "none" ? undefined : data.tripId
+    }
+    
     try {
-      const res = await createFuelLog(data)
+      const res = await createFuelLog(submitData)
       if (res.error) {
         toast.error(res.error)
         return
@@ -168,10 +189,22 @@ export function FuelForm({ vehicles }: FuelFormProps) {
             name="tripId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Trip ID (Optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Associate with a specific trip..." {...field} value={field.value || ""} />
-                </FormControl>
+                <FormLabel>Trip (Optional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || undefined} disabled={!selectedVehicleId || vehicleTrips.length === 0}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={!selectedVehicleId ? "Select a vehicle first" : vehicleTrips.length === 0 ? "No trips found for this vehicle" : "Select an associated trip"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none" className="text-muted-foreground italic">None (General Fueling)</SelectItem>
+                    {vehicleTrips.map((trip) => (
+                      <SelectItem key={trip.id} value={trip.id}>
+                        {trip.source} → {trip.destination} ({new Date(trip.createdAt).toLocaleDateString()})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
