@@ -328,3 +328,17 @@ model DashboardMetric {
   value     String
   updatedAt DateTime @default(now())
 }
+
+model AppSettings {
+  id           String       @id @default("default")
+  depotName    String
+  currency     String
+  distanceUnit DistanceUnit @default(KILOMETERS)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+enum DistanceUnit {
+  KILOMETERS
+  MILES
+}

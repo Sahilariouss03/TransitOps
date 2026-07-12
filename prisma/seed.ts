@@ -1,4 +1,4 @@
-import { PrismaClient, Role, VehicleType, VehicleStatus, DriverStatus, TripStatus, MaintenanceType, Priority, MaintenanceStatus, FuelType, ExpenseCategory, NotificationType, AuditAction } from '@prisma/client';
+import { PrismaClient, Role, VehicleType, VehicleStatus, DriverStatus, TripStatus } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
@@ -25,7 +25,7 @@ async function main() {
     },
   });
 
-  const fleetManager = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'fleet@transitops.com' },
     update: { role: Role.FLEET_MANAGER },
     create: {
@@ -36,7 +36,7 @@ async function main() {
     },
   });
 
-  const dispatcher = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'dispatcher@transitops.com' },
     update: { role: Role.DISPATCHER },
     create: {
@@ -47,7 +47,7 @@ async function main() {
     },
   });
 
-  const safety = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'safety@transitops.com' },
     update: { role: Role.SAFETY_OFFICER },
     create: {
@@ -58,7 +58,7 @@ async function main() {
     },
   });
 
-  const finance = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'finance@transitops.com' },
     update: { role: Role.FINANCIAL_ANALYST },
     create: {
@@ -66,6 +66,17 @@ async function main() {
       name: 'Financial Analyst',
       passwordHash,
       role: Role.FINANCIAL_ANALYST,
+    },
+  });
+
+  await prisma.appSettings.upsert({
+    where: { id: 'default' },
+    update: {},
+    create: {
+      id: 'default',
+      depotName: 'Gandhinagar Depot GJ4',
+      currency: 'INR (Rs)',
+      distanceUnit: 'KILOMETERS',
     },
   });
 
