@@ -18,6 +18,7 @@ export default async function DispatchTripPage() {
   ])
 
   const weightUnit = settings?.weightUnit || "TONS"
+  const currencyCode = settings?.currency || "INR"
 
   return (
     <div className="flex flex-col gap-6 p-4">
