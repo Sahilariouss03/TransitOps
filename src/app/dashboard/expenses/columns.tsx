@@ -13,7 +13,7 @@ export type ExpenseRow = {
   tripId: string | null
 }
 
-export const columns: ColumnDef<ExpenseRow>[] = [
+export const getColumns = (currencyCode: string): ColumnDef<ExpenseRow>[] => [
   {
     accessorKey: "date",
     header: ({ column }) => {
@@ -57,9 +57,10 @@ export const columns: ColumnDef<ExpenseRow>[] = [
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"))
-      const formatted = new Intl.NumberFormat("en-US", {
+      const isINR = currencyCode.includes("INR")
+      const formatted = new Intl.NumberFormat(isINR ? "en-IN" : "en-US", {
         style: "currency",
-        currency: "USD",
+        currency: isINR ? "INR" : "USD",
       }).format(amount)
       return <div className="text-right font-bold text-destructive">{formatted}</div>
     },

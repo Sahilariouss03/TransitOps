@@ -14,7 +14,7 @@ export type FuelLogRow = {
   date: Date
 }
 
-export const columns: ColumnDef<FuelLogRow>[] = [
+export const getColumns = (currencyCode: string): ColumnDef<FuelLogRow>[] => [
   {
     accessorKey: "date",
     header: ({ column }) => {
@@ -62,9 +62,10 @@ export const columns: ColumnDef<FuelLogRow>[] = [
     header: () => <div className="text-right">Total Cost</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("cost"))
-      const formatted = new Intl.NumberFormat("en-US", {
+      const isINR = currencyCode.includes("INR")
+      const formatted = new Intl.NumberFormat(isINR ? "en-IN" : "en-US", {
         style: "currency",
-        currency: "USD",
+        currency: isINR ? "INR" : "USD",
       }).format(amount)
       return <div className="text-right font-bold text-destructive">{formatted}</div>
     },

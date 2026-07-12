@@ -57,6 +57,14 @@ export default async function PrintAnalyticsPage() {
     }
   })
 
+  const isINR = currency.includes("INR")
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat(isINR ? "en-IN" : "en-US", {
+      style: "currency",
+      currency: isINR ? "INR" : "USD",
+    }).format(val)
+  }
+
   return (
     <div className="p-8 max-w-6xl mx-auto bg-white text-black font-sans">
       <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
@@ -103,10 +111,10 @@ export default async function PrintAnalyticsPage() {
               <td className="p-2 border-r border-gray-300">
                 {row.fuelEfficiency > 0 ? `${row.fuelEfficiency.toFixed(2)} km/L` : "N/A"}
               </td>
-              <td className="p-2 border-r border-gray-300">${row.totalFuelCost.toFixed(2)}</td>
-              <td className="p-2 border-r border-gray-300">${row.totalMaintenanceCost.toFixed(2)}</td>
-              <td className="p-2 border-r border-gray-300 font-semibold">${row.operationalCost.toFixed(2)}</td>
-              <td className="p-2 border-r border-gray-300">${row.totalRevenue.toFixed(2)}</td>
+              <td className="p-2 border-r border-gray-300">{formatCurrency(row.totalFuelCost)}</td>
+              <td className="p-2 border-r border-gray-300">{formatCurrency(row.totalMaintenanceCost)}</td>
+              <td className="p-2 border-r border-gray-300 font-semibold">{formatCurrency(row.operationalCost)}</td>
+              <td className="p-2 border-r border-gray-300">{formatCurrency(row.totalRevenue)}</td>
               <td className="p-2 text-right font-bold text-gray-900">{row.roi.toFixed(1)}%</td>
             </tr>
           ))}

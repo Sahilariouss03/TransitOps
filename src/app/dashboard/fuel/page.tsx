@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma"
-import { columns } from "./columns"
+import { getColumns } from "./columns"
 import { DataTable } from "@/components/ui/data-table"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
@@ -10,13 +10,20 @@ export const metadata = {
 }
 
 export default async function FuelPage() {
-  const fuelLogs = await prisma.fuelLog.findMany({
-    where: { deletedAt: null },
-    orderBy: { date: "desc" },
-    include: {
-      vehicle: true,
-    }
-  })
+  const [fuelLogs, settings] = await Promise.all([
+    prisma.fuelLog.findMany({
+      where: { deletedAt: null },
+      orderBy: { date: "desc" },
+      include: {
+        vehicle: true,
+      }
+    }),
+    prisma.appSettings.findUnique({
+      where: { id: "default" },
+    })
+  ])
+
+  const currencyCode = settings?.currency || "INR"
 
   const formattedLogs = fuelLogs.map(log => ({
     id: log.id,
@@ -26,6 +33,8 @@ export default async function FuelPage() {
     cost: Number(log.cost),
     date: log.date,
   }))
+
+  const columns = getColumns(currencyCode)
 
   return (
     <div className="flex flex-col gap-6 p-4">

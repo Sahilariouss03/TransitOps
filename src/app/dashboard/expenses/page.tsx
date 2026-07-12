@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma"
-import { columns } from "./columns"
+import { getColumns } from "./columns"
 import { DataTable } from "@/components/ui/data-table"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
@@ -11,9 +11,17 @@ export const metadata = {
 }
 
 export default async function ExpensesPage() {
-  const expenses = await prisma.expense.findMany({
-    orderBy: { date: "desc" },
-  })
+  const [expenses, settings] = await Promise.all([
+    prisma.expense.findMany({
+      orderBy: { date: "desc" },
+    }),
+    prisma.appSettings.findUnique({
+      where: { id: "default" },
+    }),
+  ])
+
+  const currencyCode = settings?.currency || "INR"
+  const isINR = currencyCode.includes("INR")
 
   const formattedExpenses = expenses.map(exp => ({
     id: exp.id,
@@ -30,6 +38,15 @@ export default async function ExpensesPage() {
     acc[curr.category] = (acc[curr.category] || 0) + curr.amount
     return acc
   }, {} as Record<string, number>)
+
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat(isINR ? "en-IN" : "en-US", {
+      style: "currency",
+      currency: isINR ? "INR" : "USD",
+    }).format(val)
+  }
+
+  const columns = getColumns(currencyCode)
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -52,7 +69,7 @@ export default async function ExpensesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
-              ${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              {formatCurrency(totalExpenses)}
             </div>
           </CardContent>
         </Card>
@@ -63,7 +80,7 @@ export default async function ExpensesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                {formatCurrency(amount)}
               </div>
             </CardContent>
           </Card>

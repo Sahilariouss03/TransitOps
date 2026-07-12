@@ -16,7 +16,8 @@ export default async function AnalyticsPage() {
     fuelLogsCount,
     maintenanceLogsCount,
     totalRevenueResult,
-    totalExpensesResult
+    totalExpensesResult,
+    settings
   ] = await Promise.all([
     prisma.expense.findMany({
       where: { date: { gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } },
@@ -39,6 +40,9 @@ export default async function AnalyticsPage() {
     }),
     prisma.expense.aggregate({
       _sum: { amount: true }
+    }),
+    prisma.appSettings.findUnique({
+      where: { id: "default" }
     })
   ])
   
@@ -55,10 +59,19 @@ export default async function AnalyticsPage() {
     { name: 'Utilization', used: vehicles.filter(v => v.status !== "AVAILABLE").length, total: vehicles.length }
   ]
 
+  const currencyCode = settings?.currency || "INR"
+  const isINR = currencyCode.includes("INR")
+
   const totalRevenue = Number(totalRevenueResult._sum.revenue || 0)
   const totalExpense = Number(totalExpensesResult._sum.amount || 0)
   const netProfit = totalRevenue - totalExpense
 
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat(isINR ? "en-IN" : "en-US", {
+      style: "currency",
+      currency: isINR ? "INR" : "USD",
+    }).format(val)
+  }
   // Calculate per-vehicle metrics
   const vehicleMetrics = vehicles.map(vehicle => {
     const completedTrips = vehicle.trips.filter(t => t.status === "COMPLETED")
@@ -106,7 +119,7 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${netProfit >= 0 ? "text-green-600" : "text-red-600"}`}>
-              ${netProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(netProfit)}
             </div>
             <p className="text-xs text-muted-foreground">Lifetime</p>
           </CardContent>
@@ -156,7 +169,7 @@ export default async function AnalyticsPage() {
         </p>
       </div>
 
-      <AnalyticsTable data={vehicleMetrics} />
+      <AnalyticsTable data={vehicleMetrics} currencyCode={currencyCode} />
       
       <Card>
         <CardHeader>
@@ -167,17 +180,17 @@ export default async function AnalyticsPage() {
           <div className="flex flex-col space-y-4">
             <div className="flex items-center justify-between">
               <span className="font-medium text-muted-foreground">Gross Revenue</span>
-              <span className="font-bold">${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span className="font-bold">{formatCurrency(totalRevenue)}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="font-medium text-muted-foreground">Total Operating Expenses</span>
-              <span className="font-bold">${totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span className="font-bold">{formatCurrency(totalExpense)}</span>
             </div>
             <div className="h-px w-full bg-border" />
             <div className="flex items-center justify-between">
               <span className="font-medium text-muted-foreground">Net Profit</span>
               <span className={`font-bold ${netProfit >= 0 ? "text-green-600" : "text-red-600"}`}>
-                ${netProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {formatCurrency(netProfit)}
               </span>
             </div>
           </div>

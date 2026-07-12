@@ -30,9 +30,10 @@ interface VehicleMetric {
 
 interface AnalyticsTableProps {
   data: VehicleMetric[]
+  currencyCode: string
 }
 
-export function AnalyticsTable({ data }: AnalyticsTableProps) {
+export function AnalyticsTable({ data, currencyCode }: AnalyticsTableProps) {
   const [search, setSearch] = useState("")
 
   const filteredData = data.filter(
@@ -50,10 +51,10 @@ export function AnalyticsTable({ data }: AnalyticsTableProps) {
       "Total Distance (km)",
       "Total Fuel (L)",
       "Fuel Efficiency (km/L)",
-      "Fuel Cost ($)",
-      "Maintenance Cost ($)",
-      "Operational Cost ($)",
-      "Total Revenue ($)",
+      `Fuel Cost (${currencyCode})`,
+      `Maintenance Cost (${currencyCode})`,
+      `Operational Cost (${currencyCode})`,
+      `Total Revenue (${currencyCode})`,
       "ROI (%)",
     ]
 
@@ -138,6 +139,14 @@ export function AnalyticsTable({ data }: AnalyticsTableProps) {
               ) : (
                 filteredData.map((row) => {
                   const roiPositive = row.roi >= 0
+                  const isINR = currencyCode.includes("INR")
+                  const formatCurrency = (val: number) => {
+                    return new Intl.NumberFormat(isINR ? "en-IN" : "en-US", {
+                      style: "currency",
+                      currency: isINR ? "INR" : "USD",
+                    }).format(val)
+                  }
+
                   return (
                     <TableRow key={row.id}>
                       <TableCell>
@@ -155,20 +164,14 @@ export function AnalyticsTable({ data }: AnalyticsTableProps) {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm font-medium">
-                          ${row.operationalCost.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                          {formatCurrency(row.operationalCost)}
                         </div>
                         <div className="text-[10px] text-muted-foreground">
-                          Fuel: ${row.totalFuelCost.toFixed(2)} | Maint: ${row.totalMaintenanceCost.toFixed(2)}
+                          Fuel: {formatCurrency(row.totalFuelCost)} | Maint: {formatCurrency(row.totalMaintenanceCost)}
                         </div>
                       </TableCell>
                       <TableCell>
-                        ${row.totalRevenue.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
+                        {formatCurrency(row.totalRevenue)}
                       </TableCell>
                       <TableCell className="text-right">
                         <span

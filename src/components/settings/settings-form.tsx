@@ -90,11 +90,27 @@ export function SettingsForm({ canEdit, defaultValues }: SettingsFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Currency</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={!canEdit || isPending} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!canEdit || isPending}
+                      items={[
+                        { value: "INR", label: "INR (₹)" },
+                        { value: "USD", label: "USD ($)" }
+                      ]}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="INR">INR (₹)</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormDescription>
-                      Example: <span className="font-medium">INR (Rs)</span> or <span className="font-medium">USD ($)</span>.
+                      System currency displayed across ledger, fuel and operating costs.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
