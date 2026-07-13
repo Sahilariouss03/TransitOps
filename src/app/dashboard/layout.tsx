@@ -6,14 +6,10 @@ import { TopNav } from "@/components/layout/top-nav"
 import { CommandPalette } from "@/components/layout/command-palette"
 import { PageTransition } from "@/components/ui/page-transition"
 import { useSearchParams, useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import { toast } from "sonner"
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function AccessDeniedListener() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const denied = searchParams?.get("denied")
@@ -26,8 +22,20 @@ export default function DashboardLayout({
       router.replace(newUrl)
     }
   }, [denied, router])
+
+  return null
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <SidebarProvider>
+      <Suspense fallback={null}>
+        <AccessDeniedListener />
+      </Suspense>
       <AppSidebar />
       <SidebarInset>
         <CommandPalette />
